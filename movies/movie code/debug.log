@@ -1,0 +1,4 @@
+[0401/141619.293:ERROR:base\i18n\icu_util.cc:232] Invalid file descriptor to ICU data received.
+[0401/141641.277:ERROR:base\i18n\icu_util.cc:232] Invalid file descriptor to ICU data received.
+[0401/141931.295:ERROR:base\i18n\icu_util.cc:232] Invalid file descriptor to ICU data received.
+[0401/142407.036:ERROR:base\i18n\icu_util.cc:232] Invalid file descriptor to ICU data received.

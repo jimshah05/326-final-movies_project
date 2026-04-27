@@ -85,14 +85,28 @@ class Transform:
 
                 
                 input_element = wait.until(EC.presence_of_element_located((By.ID , "suggestion-search")))
-                # this waits until the search bar with ID "suggestion-search" appears on the page then saves that search bar in input_element
+                # # this waits until the search bar with ID "suggestion-search" appears on the page then saves that search bar in input_element
 
                 input_element.send_keys(str(movie) + Keys.ENTER)
-                # this enters monkey or wtv movie you want in the search bar and than clicks the enter button 
+                # # this enters monkey or wtv movie you want in the search bar and than clicks the enter button 
 
-                time.sleep(10)
+                # time.sleep(10)
 
                 # stays on that chrome or google screen for that long than quits 
+                all_results = wait.until(
+                        EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.ipc-metadata-list-summary-item__t"))
+                    )
+
+                found = False
+                for result in all_results:
+                        if movie in result.text:
+                            found = True
+                            break
+
+                        if found:
+                            print("woozy")
+                        else:
+                            print("oopsy doozy")
 
 
 

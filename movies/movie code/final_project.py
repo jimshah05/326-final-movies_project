@@ -90,11 +90,11 @@ class Transform:
                 input_element.send_keys(str(movie) + Keys.ENTER)
                 # # this enters monkey or wtv movie you want in the search bar and than clicks the enter button 
 
-                # time.sleep(10)
+                time.sleep(15)
 
                 # stays on that chrome or google screen for that long than quits 
                 all_results = wait.until(
-                        EC.presence_of_all_elements_located((By.CSS_SELECTOR, "a.ipc-metadata-list-summary-item__t"))
+                        EC.visibility_of_all_elements_located((By.CSS_SELECTOR,"[data-testid='find-results-section-title'] a"))
                     )
 
                 found = False
@@ -103,9 +103,9 @@ class Transform:
                             found = True
                             break
 
-                        if found:
+                if found:
                             print("woozy")
-                        else:
+                else:
                             print("oopsy doozy")
 
 

@@ -80,7 +80,7 @@ class Transform:
 
 
         for movie , column in self.extracted_data.missing_movie_detail.items():
-
+            movie = str(movie)
             for column_name , info in column.items():
 
                 
@@ -104,7 +104,10 @@ class Transform:
                             break
 
                 if found:
-                            print("woozy")
+                            
+                            if len(all_results) > 0:
+                                 print(f"IMDb found something for {movie}: {all_results[0].text}")
+                            
                 else:
                             print("oopsy doozy")
 

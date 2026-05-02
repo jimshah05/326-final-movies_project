@@ -7,6 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import pandas as pd
 import os 
+import re
 
 
 
@@ -30,7 +31,6 @@ class movie_extract:
 
     def check_null(self , data):
 
-
         for movie , m_info in data.items():
 
 
@@ -39,13 +39,13 @@ class movie_extract:
                 if pd.isna(info):
 
                     if movie not in self.missing_movie_detail:
-                        self.missing_movie_detail[movie] = {}
+                        self.missing_movie_detail[movie] = {'IMDB_ID' : m_info['IMDB_ID']}
 
                     self.missing_movie_detail[movie][column] = [info]
                     # print(missing_movie_detail)
                 
 
-
+        print(self.missing_movie_detail)
 
         return self.missing_movie_detail
          
@@ -81,35 +81,23 @@ class Transform:
 
         for movie , column in self.extracted_data.missing_movie_detail.items():
             movie = str(movie)
-            for column_name , info in column.items():
+            imdb_id = column['IMDB_ID']
 
-                
-                input_element = wait.until(EC.presence_of_element_located((By.ID , "suggestion-search")))
-                # # this waits until the search bar with ID "suggestion-search" appears on the page then saves that search bar in input_element
+            current_url = driver.current_url
+            driver.get(f"https://www.imdb.com/title/{imdb_id}/")
+            time.sleep(3)
 
-                input_element.send_keys(str(movie) + Keys.ENTER)
-                # # this enters monkey or wtv movie you want in the search bar and than clicks the enter button 
 
-                time.sleep(15)
 
-                # stays on that chrome or google screen for that long than quits 
-                all_results = wait.until(
-                        EC.visibility_of_all_elements_located((By.CSS_SELECTOR,"[data-testid='find-results-section-title'] a"))
-                    )
+            all_results = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "hero__primary-text")))
+            all_movies = all_results.text
 
-                found = False
-                for result in all_results:
-                        if movie in result.text:
-                            found = True
-                            break
+            if all_movies.lower() == movie.lower():
+                print(f"I found the movie: {movie} ")
+            else:
+                print(f"nope this is the wrong movie: {movie} ")
 
-                if found:
-                            
-                            if len(all_results) > 0:
-                                 print(f"IMDb found something for {movie}: {all_results[0].text}")
-                            
-                else:
-                            print("oopsy doozy")
+
 
 
 

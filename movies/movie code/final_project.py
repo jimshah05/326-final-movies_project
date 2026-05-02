@@ -81,7 +81,7 @@ class Transform:
 
         for movie , column in self.extracted_data.missing_movie_detail.items():
             movie = str(movie)
-            imdb_id = column['IMDB_ID']
+            imdb_id = column['IMDB_ID'] 
 
             current_url = driver.current_url
             driver.get(f"https://www.imdb.com/title/{imdb_id}/")
@@ -89,13 +89,23 @@ class Transform:
 
 
 
-            all_results = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "hero__primary-text")))
-            all_movies = all_results.text
+            # all_results = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "hero__primary-text")))
+            # all_movies = all_results.text
+            found_info = {}
 
-            if all_movies.lower() == movie.lower():
-                print(f"I found the movie: {movie} ")
-            else:
-                print(f"nope this is the wrong movie: {movie} ")
+            if 'Length' in column and pd.isna(column.get('Length')):
+                all_results = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "ipc-inline-list__item"))) 
+
+                for info in all_results:
+
+                    modified_text = info.text.strip()
+
+                    if re.match(r'^\d+h(\s\d+m)?$|^\d+m$', modified_text):
+                       found_info['Length'] = modified_text 
+                       print(f" {movie} and - {found_info}")
+                       break 
+                     
+
 
 
 

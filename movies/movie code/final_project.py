@@ -41,7 +41,7 @@ class movie_extract:
                     if movie not in self.missing_movie_detail:
                         self.missing_movie_detail[movie] = {'IMDB_ID' : m_info['IMDB_ID']}
 
-                    self.missing_movie_detail[movie][column] = [info]
+                    self.missing_movie_detail[movie][column] = info
                     # print(missing_movie_detail)
                 
 
@@ -89,8 +89,7 @@ class Transform:
 
 
 
-            # all_results = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "hero__primary-text")))
-            # all_movies = all_results.text
+           
             found_info = {}
 
             if 'Length' in column and pd.isna(column.get('Length')):
@@ -103,8 +102,20 @@ class Transform:
                     if re.match(r'^\d+h(\s\d+m)?$|^\d+m$', modified_text):
                        found_info['Length'] = modified_text 
                        print(f" {movie} and - {found_info}")
-                       break 
-                     
+                       break
+           
+            elif 'Rating' in column and pd.isna(column.get('Rating')):
+                all_results = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-testid="hero-rating-bar__aggregate-rating__score"]'))) 
+                modified_text = all_results.get_attribute("innerText").strip()
+
+                if re.search(r'(\d+(?:\.\d+)?)', modified_text):
+
+                    found_info["Rating"] = modified_text
+                    print(f" {movie} and - {found_info}")
+            
+            
+            
+  
 
 
 

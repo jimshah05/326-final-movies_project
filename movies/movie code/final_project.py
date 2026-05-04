@@ -59,7 +59,7 @@ class Transform:
     def __init__(self , extracted_data):
 
         self.extracted_data = extracted_data
-
+        self.found_info = {}
     
     def web_search(self):
         current_path = os.path.dirname(os.path.abspath(__file__))
@@ -90,7 +90,7 @@ class Transform:
 
 
            
-            found_info = {}
+            
 
             if 'Length' in column and pd.isna(column.get('Length')):
                 all_results = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "ipc-inline-list__item"))) 
@@ -100,8 +100,8 @@ class Transform:
                     modified_text = info.text.strip()
 
                     if re.match(r'^\d+h(\s\d+m)?$|^\d+m$', modified_text):
-                       found_info['Length'] = modified_text 
-                       print(f" {movie} and - {found_info}")
+                       self.found_info['Length'] = modified_text 
+                       print(f" {movie} and - {self.found_info}")
                        break
            
             elif 'Rating' in column and pd.isna(column.get('Rating')):
@@ -110,10 +110,42 @@ class Transform:
 
                 if re.search(r'(\d+(?:\.\d+)?)', modified_text):
 
-                    found_info["Rating"] = modified_text
-                    print(f" {movie} and - {found_info}")
-            
-            
+                    self.found_info["Rating"] = modified_text
+                    print(f" {movie} and - {self.found_info}")
+    
+    def get_user_movie(self , user_movie):
+
+        driver = webdriver.Chrome()
+        
+
+        if re.match(r"^tt\d{7,8}$" , user_movie):
+
+            driver.get(f"https://www.imdb.com/title/{user_movie}/")
+            time.sleep(3)
+
+        else:
+            driver.get("https://www.imdb.com")
+            wait = WebDriverWait(driver , 5)
+            all_results = wait.until(EC.presence_of_element_located((By.ID, "suggestion-search"))) 
+
+            all_results.send_keys(user_movie)
+            all_results.send_keys(Keys.ENTER)
+            first_search_result = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "li a[href^='/title/tt']")))
+            first_search_result.click()
+            time.sleep(4)
+
+            finding_length_user = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "ipc-inline-list__item"))) 
+
+        for info in finding_length_user:
+
+                    modified_text = info.text.strip()
+
+                    if re.match(r'^\d+h(\s\d+m)?$|^\d+m$', modified_text):
+                       self.found_info['Length'] = modified_text 
+                       print(f" {user_movie} - {self.found_info}")
+                       break
+        
+
             
   
 
@@ -132,59 +164,10 @@ movie_extraction.check_null(data)
 
 transform = Transform(movie_extraction)
 
-transform.web_search()
+transform.get_user_movie('Spider-Man')
 
 
 
 
 
   
-
-# service = Service(executable_path="chromedriver.exe")
-# # this tells python to use this chromedriver to control and run chrome 
-
-# driver = webdriver.Chrome(service=service)
-# # this launches the chrome browser that selenium can control 
-
-# driver.get("https://www.imdb.com")
-# # this gets the website which we would be using 
-
-# wait = WebDriverWait(driver ,10)
-# # this tells the program to wait 10 secs on driver 
-
-# input_element = wait.until(EC.presence_of_element_located((By.ID , "suggestion-search")))
-# # this waits until the search bar with ID "suggestion-search" appears on the page then saves that search bar in input_element
-
-# input_element.send_keys("monkey" + Keys.ENTER)
-# # this enters monkey or wtv movie you want in the search bar and than clicks the enter button 
-
-# time.sleep(10)
-
-# # stays on that chrome or google screen for that long than quits 
-
-
-
-# driver.get("https://www.themoviedb.org/")
-
-# wait = WebDriverWait(driver ,10)
-
-# input_element = wait.until(EC.presence_of_element_located((By.ID , "search_v4")))
-
-# input_element.send_keys("Hoppers" + Keys.ENTER)
-
- 
-
-# all_results = wait.until(
-#     EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".search_results h2 span"))
-# )
-
-# found = False
-# for result in all_results:
-#     if "Hip Hoppers" in result.text:
-#         found = True
-#         break
-
-# if found:
-#     print("woozy")
-# else:
-#     print("oopsy doozy")

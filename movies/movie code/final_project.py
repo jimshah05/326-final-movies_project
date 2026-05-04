@@ -31,7 +31,6 @@ class movie_extract:
         return data 
 
     def check_null(self , data):
-        print(data)
 
         for movie , m_info in data.items():
 

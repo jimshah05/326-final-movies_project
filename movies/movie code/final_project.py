@@ -138,6 +138,7 @@ class Transform:
         finding_length_user = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "ipc-inline-list__item"))) 
         finding_rating_user = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-testid="hero-rating-bar__aggregate-rating__score"]'))) 
         finding_date_user = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".ipc-metadata-list__item"))) 
+        finding_genre_user = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "ipc-chip-list__scroller"))) 
         for info in finding_length_user:
 
                     modified_text = info.text.strip()
@@ -164,10 +165,16 @@ class Transform:
                         formatted_date = date_object.strftime(" %Y ,%m ,%d")
 
                         self.found_info["Date"] = formatted_date
-                        print(f"{user_movie} and - {self.found_info}")
-                        # self.found_info["Date"] = date_match
-                        # print(f" {user_movie} and - {self.found_info}")
+                        print(f"{user_movie} and - {self.found_info}") 
+        modified_text = finding_genre_user.get_attribute("innerText").strip('\n')
+        genres = modified_text.split("\n")
+    
+        # genre_match = re.findall(r"[A-Za-z]+(?:-[A-Za-z]+)?(?:\s[A-Za-z]+(?:-[A-Za-z]+)?)*", modified_text)
 
+        if genres:
+             self.found_info["Genre"] = " , " .join(genres)
+             print(self.found_info)
+                       
         
 
 

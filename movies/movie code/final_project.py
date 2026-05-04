@@ -8,7 +8,7 @@ import time
 import pandas as pd
 import os 
 import re
-
+from datetime import datetime
 
 
 class movie_extract:
@@ -25,11 +25,13 @@ class movie_extract:
         excel_file = os.path.join(dir_path , self.movie_table)
 
         df = pd.read_excel(excel_file)
+        df["Date"] = pd.to_datetime(df["Date"] ,  errors="coerce").dt.strftime(" %Y ,%m ,%d")
         data = df.set_index("Movie").to_dict(orient = "index")
         # print(data)
         return data 
 
     def check_null(self , data):
+        print(data)
 
         for movie , m_info in data.items():
 
@@ -134,16 +136,45 @@ class Transform:
             first_search_result.click()
             time.sleep(4)
 
-            finding_length_user = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "ipc-inline-list__item"))) 
-
+        finding_length_user = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, "ipc-inline-list__item"))) 
+        finding_rating_user = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-testid="hero-rating-bar__aggregate-rating__score"]'))) 
+        finding_date_user = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".ipc-metadata-list__item"))) 
         for info in finding_length_user:
 
                     modified_text = info.text.strip()
 
                     if re.match(r'^\d+h(\s\d+m)?$|^\d+m$', modified_text):
                        self.found_info['Length'] = modified_text 
-                       print(f" {user_movie} - {self.found_info}")
+                    #    print(f" {user_movie} - {self.found_info}")
                        break
+        modified_text = finding_rating_user.get_attribute("innerText").strip()
+        if re.search(r'(\d+(?:\.\d+)?)', modified_text):
+
+                    self.found_info["Rating"] = modified_text
+                    # print(f" {user_movie} and - {self.found_info}")
+        
+        for the_info in finding_date_user:
+             modified_text = the_info.get_attribute("innerText").strip()
+
+             if re.search(r"United States" , modified_text):
+                   date_match = re.search(r"[A-Z][a-z]+ \d{1,2}, \d{4}", modified_text)
+                   if date_match:
+                        date_text = date_match.group()
+
+                        date_object = datetime.strptime(date_text, "%B %d, %Y")
+                        formatted_date = date_object.strftime(" %Y ,%m ,%d")
+
+                        self.found_info["Date"] = formatted_date
+                        print(f"{user_movie} and - {self.found_info}")
+                        # self.found_info["Date"] = date_match
+                        # print(f" {user_movie} and - {self.found_info}")
+
+        
+
+
+        
+        
+
         
 
             

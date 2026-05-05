@@ -18,6 +18,7 @@ class movie_extract:
         self.movie_table = movie_table
         self.missing_info = []
         self.missing_movie_detail = {}
+        
 
 
     def data_search(self):
@@ -31,6 +32,7 @@ class movie_extract:
         return data 
 
     def check_null(self , data):
+        print(data)
 
         for movie , m_info in data.items():
 
@@ -61,7 +63,8 @@ class Transform:
 
         self.extracted_data = extracted_data
         self.found_info = {}
-    
+        self.hours = 0 
+        self.mints = 0 
     def web_search(self):
         current_path = os.path.dirname(os.path.abspath(__file__))
         chrome_driver_path = os.path.join(current_path , "chromedriver.exe")
@@ -90,7 +93,7 @@ class Transform:
 
 
 
-           
+            self.found_info[movie] = {"IMDB_ID" : imdb_id}
             
 
             if 'Length' in column and pd.isna(column.get('Length')):
@@ -101,8 +104,16 @@ class Transform:
                     modified_text = info.text.strip()
 
                     if re.match(r'^\d+h(\s\d+m)?$|^\d+m$', modified_text):
-                       self.found_info['Length'] = modified_text 
-                       print(f" {movie} and - {self.found_info}")
+                       hours_match = re.search(r"(\d+)h" , modified_text)
+                       mints_match = re.search(r"(\d+)m", modified_text)
+                       if hours_match:
+                            self.hours = int(hours_match.group(1))
+                       if mints_match:
+                            self.mints = int(hours_match.group(1))
+                        
+                       new_time = self.hours *60 + self.mints
+                       
+                       self.found_info[movie]['Length'] = new_time 
                        break
            
             elif 'Rating' in column and pd.isna(column.get('Rating')):
@@ -111,8 +122,10 @@ class Transform:
 
                 if re.search(r'(\d+(?:\.\d+)?)', modified_text):
 
-                    self.found_info["Rating"] = modified_text
-                    print(f" {movie} and - {self.found_info}")
+                    self.found_info[movie]["Rating"] = modified_text
+                    # break 
+            
+        return self.found_info
     
     def get_user_movie(self , user_movie):
 
@@ -144,7 +157,18 @@ class Transform:
                     modified_text = info.text.strip()
 
                     if re.match(r'^\d+h(\s\d+m)?$|^\d+m$', modified_text):
-                       self.found_info['Length'] = modified_text 
+                       if re.match(r'^\d+h(\s\d+m)?$|^\d+m$', modified_text):
+                        hours_match = re.search(r"(\d+)h" , modified_text)
+                        mints_match = re.search(r"(\d+)m", modified_text)
+                       if hours_match:
+                            self.hours = int(hours_match.group(1))
+                       if mints_match:
+                            self.mints = int(hours_match.group(1))
+                        
+                       new_time = self.hours *60 + self.mints
+                       
+                       
+                       self.found_info['Length'] = new_time
                     #    print(f" {user_movie} - {self.found_info}")
                        break
         modified_text = finding_rating_user.get_attribute("innerText").strip()
@@ -163,6 +187,7 @@ class Transform:
 
                         date_object = datetime.strptime(date_text, "%B %d, %Y")
                         formatted_date = date_object.strftime(" %Y ,%m ,%d")
+                        
 
                         self.found_info["Date"] = formatted_date
                         print(f"{user_movie} and - {self.found_info}") 
@@ -174,12 +199,10 @@ class Transform:
         if genres:
              self.found_info["Genre"] = " , " .join(genres)
              print(self.found_info)
+
                        
         
 
-
-        
-        
 
         
 
@@ -203,6 +226,7 @@ transform = Transform(movie_extraction)
 
 transform.get_user_movie('Spider-Man')
 
+# print(transform.web_search())
 
 
 

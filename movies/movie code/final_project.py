@@ -152,9 +152,18 @@ class Transform:
         finding_rating_user = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-testid="hero-rating-bar__aggregate-rating__score"]'))) 
         finding_date_user = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, ".ipc-metadata-list__item"))) 
         finding_genre_user = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "ipc-chip-list__scroller"))) 
+        finding_country_user = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR , '[data-testid="title-details-origin"] a'))) 
+        finding_director_user = wait.until(EC.presence_of_element_located((By.CSS_SELECTOR,'[data-testid="title-pc-principal-credit"] a' )))
+        
         for info in finding_length_user:
 
                     modified_text = info.text.strip()
+
+                    age_rating = re.search(r"^(G|PG|PG-13|R|NC-17|TV-MA|TV-14|TV-PG|TV-G|TV-Y7|TV-Y)$", modified_text)
+
+                    if age_rating:
+                         
+                         self.found_info["Age_Rate"] = age_rating.group(1)
 
                     if re.match(r'^\d+h(\s\d+m)?$|^\d+m$', modified_text):
                        if re.match(r'^\d+h(\s\d+m)?$|^\d+m$', modified_text):
@@ -190,7 +199,7 @@ class Transform:
                         
 
                         self.found_info["Date"] = formatted_date
-                        print(f"{user_movie} and - {self.found_info}") 
+                        
         modified_text = finding_genre_user.get_attribute("innerText").strip('\n')
         genres = modified_text.split("\n")
     
@@ -198,11 +207,53 @@ class Transform:
 
         if genres:
              self.found_info["Genre"] = " , " .join(genres)
-             print(self.found_info)
+             
 
                        
+        modified_text = finding_country_user.get_attribute("innerText").strip()
+
+        self.found_info["Country"] = modified_text
+        # print(f"{user_movie} and - {self.found_info}") 
+
+        modified_text = finding_director_user.get_attribute("innerText").strip()
+
+        self.found_info["Director"] = modified_text 
+
         
 
+        driver.get("https://www.boxofficemojo.com/")
+        wait = WebDriverWait(driver , 5)
+        all_results = wait.until(EC.presence_of_element_located((By.ID, "mojo-search-text-input"))) 
+
+        all_results.send_keys(user_movie)
+        all_results.send_keys(Keys.ENTER)
+        first_search_result = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR,".a-fixed-left-grid-col.a-col-right a.a-link-normal")))
+        
+        time.sleep(4)
+
+        for movies in first_search_result:
+             movie_title = movies.text.strip()
+
+             if movie_title.lower() == user_movie.lower():
+                  
+                  movies.click()
+                  time.sleep(4)
+                  break
+             
+        
+        finding_income_user = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME,'money' )))     
+
+        different_income = [ ]
+
+        for income_info in finding_income_user:
+            modified_text = income_info.get_attribute("innerText").strip()
+
+            if modified_text:
+               different_income.append(modified_text)
+                  
+       
+        self.found_info["Income"] = different_income[1]
+        print(f"{user_movie} and - {self.found_info}") 
 
         
 
@@ -210,6 +261,7 @@ class Transform:
   
 
 
+                  
 
 
 

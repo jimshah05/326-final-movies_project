@@ -66,15 +66,16 @@ class Transform:
         self.hours = 0 
         self.mints = 0 
     def web_search(self):
-        current_path = os.path.dirname(os.path.abspath(__file__))
-        chrome_driver_path = os.path.join(current_path , "chromedriver.exe")
+        # current_path = os.path.dirname(os.path.abspath(__file__))
+        # chrome_driver_path = os.path.join(current_path , "chromedriver.exe")
 
-                # print(f"This is the {movie} and this is the info {info}")
-        service = Service(executable_path=chrome_driver_path)
-                # this tells python to use this chromedriver to control and run chrome 
+        #         # print(f"This is the {movie} and this is the info {info}")
+        # service = Service(executable_path=chrome_driver_path)
+        #         # this tells python to use this chromedriver to control and run chrome 
 
-        driver = webdriver.Chrome(service=service)
-                # this launches the chrome browser that selenium can control 
+        # driver = webdriver.Chrome(service=service)
+        #         # this launches the chrome browser that selenium can control 
+        driver = webdriver.Chrome()
 
         driver.get("https://www.imdb.com")
                 # this gets the website which we would be using 
@@ -130,6 +131,7 @@ class Transform:
     def get_user_movie(self , user_movie):
 
         driver = webdriver.Chrome()
+        self.found_info[user_movie] = {}
         
 
         if re.match(r"^tt\d{7,8}$" , user_movie):
@@ -177,13 +179,13 @@ class Transform:
                        new_time = self.hours *60 + self.mints
                        
                        
-                       self.found_info['Length'] = new_time
+                       self.found_info[user_movie]['Length'] = new_time
                     #    print(f" {user_movie} - {self.found_info}")
                        break
         modified_text = finding_rating_user.get_attribute("innerText").strip()
         if re.search(r'(\d+(?:\.\d+)?)', modified_text):
 
-                    self.found_info["Rating"] = modified_text
+                    self.found_info[user_movie]["Rating"] = modified_text
                     # print(f" {user_movie} and - {self.found_info}")
         
         for the_info in finding_date_user:
@@ -198,7 +200,7 @@ class Transform:
                         formatted_date = date_object.strftime(" %Y ,%m ,%d")
                         
 
-                        self.found_info["Date"] = formatted_date
+                        self.found_info[user_movie]["Date"] = formatted_date
                         
         modified_text = finding_genre_user.get_attribute("innerText").strip('\n')
         genres = modified_text.split("\n")
@@ -212,12 +214,12 @@ class Transform:
                        
         modified_text = finding_country_user.get_attribute("innerText").strip()
 
-        self.found_info["Country"] = modified_text
+        self.found_info[user_movie]["Country"] = modified_text
         # print(f"{user_movie} and - {self.found_info}") 
 
         modified_text = finding_director_user.get_attribute("innerText").strip()
 
-        self.found_info["Director"] = modified_text 
+        self.found_info[user_movie]["Director"] = modified_text 
 
         
 
@@ -252,8 +254,8 @@ class Transform:
                different_income.append(modified_text)
                   
        
-        self.found_info["Income"] = different_income[1]
-        print(f"{user_movie} and - {self.found_info}") 
+        self.found_info[user_movie]["Income"] = different_income[1]
+        print(self.found_info) 
 
         
 
@@ -275,10 +277,10 @@ data = movie_extraction.data_search()
 movie_extraction.check_null(data)
 
 transform = Transform(movie_extraction)
-
+# print(transform.web_search())
 transform.get_user_movie('Spider-Man')
 
-# print(transform.web_search())
+
 
 
 
